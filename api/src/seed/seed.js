@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 const Restaurant = require('../models/Restaurant');
 const Plat = require('../models/Plat');
 
-// LIEN DIRECT (Pour éviter l'erreur de chemin .env)
-const MONGODB_URI = "mongodb+srv://abdou-drame:Iniesta500@cluster0.ewibmle.mongodb.net/terrangafood?retryWrites=true&w=majority";
 
 const restaurants = [
   {
