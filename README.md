@@ -1,6 +1,6 @@
-# 🍛 TerrangaFood
+# 🍛 TerrangaFood — Equipe our-group —
 
-Plateforme de commande de plat auprès de restaura thies.
+Plateforme de commande de plats auprès de restaurants saint louis.
 
 **Projet pédagogique** — Architecture Logicielle 2 — L3 Génie Logiciel — UCAD / ESP
 
