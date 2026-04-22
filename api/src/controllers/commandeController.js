@@ -1,21 +1,112 @@
-// api/src/controllers/commandeController.js
+const Commande = require('../models/Commande');
 
-exports.create = async (req, res) => {
-    res.status(201).json({ message: "Route CREATE fonctionnelle" });
+// Transitions de statut autorisées
+const transitionsAutorisees = {
+  'en attente': ['confirmée', 'annulée'],
+  'confirmée': ['en livraison', 'annulée'],
+  'en livraison': ['livrée'],
+  'livrée': [],
+  'annulée': []
 };
 
-exports.getAll = async (req, res) => {
-    res.status(200).json([]);
+// POST /api/commandes - Créer une commande
+exports.create = async (req, res, next) => {
+  try {
+    const commande = new Commande(req.body);
+    const saved = await commande.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({
+        message: 'Données invalides',
+        errors: messages
+      });
+    }
+    next(error);
+  }
 };
 
-exports.getById = async (req, res) => {
-    res.status(200).json({ message: "Route GET BY ID fonctionnelle" });
+// GET /api/commandes - Lister toutes les commandes
+exports.getAll = async (req, res, next) => {
+  try {
+    const commandes = await Commande.find()
+      .populate('restaurant', 'nom adresse')
+      .populate('plats', 'nom prix')
+      .sort({ createdAt: -1 });
+    res.json(commandes);
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.updateStatut = async (req, res) => {
-    res.status(200).json({ message: "Route UPDATE fonctionnelle" });
+// GET /api/commandes/:id - Détail d'une commande
+exports.getById = async (req, res, next) => {
+  try {
+    const commande = await Commande.findById(req.params.id)
+      .populate('restaurant', 'nom adresse telephone')
+      .populate('plats', 'nom prix categorie');
+    if (!commande) {
+      return res.status(404).json({
+        message: 'Commande non trouvée'
+      });
+    }
+    res.json(commande);
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.delete = async (req, res) => {
-    res.status(200).json({ message: "Route DELETE fonctionnelle" });
+// PATCH /api/commandes/:id/statut - Changer le statut
+exports.updateStatut = async (req, res, next) => {
+  try {
+    const { statut } = req.body;
+
+    if (!statut) {
+      return res.status(400).json({
+        message: 'Le champ "statut" est obligatoire'
+      });
+    }
+
+    const commande = await Commande.findById(req.params.id);
+
+    if (!commande) {
+      return res.status(404).json({
+        message: 'Commande non trouvée'
+      });
+    }
+
+    // Vérifier que la transition est autorisée
+    const transitions = transitionsAutorisees[commande.statut];
+    if (!transitions.includes(statut)) {
+      return res.status(400).json({
+        message: 'Transition impossible',
+        details: `"${commande.statut}" ne peut pas devenir "${statut}"`,
+        transitionsAutorisees: transitions
+      });
+    }
+
+    commande.statut = statut;
+    const updated = await commande.save();
+    res.json(updated);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/commandes/:id - Supprimer une commande
+exports.delete = async (req, res, next) => {
+  try {
+    const commande = await Commande.findByIdAndDelete(req.params.id);
+    if (!commande) {
+      return res.status(404).json({
+        message: 'Commande non trouvée'
+      });
+    }
+    res.json({
+      message: 'Commande supprimée avec succès'
+    });
+  } catch (error) {
+    next(error);
+  }
 };
