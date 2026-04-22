@@ -18,6 +18,7 @@ require('dotenv').config();
 const restaurantRoutes = require('./routes/restaurants');
 const platRoutes = require('./routes/plats');
 const errorHandler = require('./middleware/errorHandler');
+const commandeRoutes = require('./routes/commandes');
 
 // Charger les variables d'environnement
 dotenv.config({ path: '../.env' });
@@ -37,13 +38,15 @@ app.get('/', (req, res) => {
     version: '0.0.0',
     endpoints: {
       restaurants: '/api/restaurants',
-      plats: '/api/plats'
+      plats: '/api/plats',
+      commandes: '/api/commandes'
     }
   });
 });
 
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/plats', platRoutes);
+app.use('/api/commandes', commandeRoutes);
 
 // --- Gestion des erreurs ---
 app.use(errorHandler);
