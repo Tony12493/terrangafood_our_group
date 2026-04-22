@@ -85,3 +85,8 @@ terrangafood/
 ## Licence
 
 Projet pédagogique — Usage académique uniquement.
+
+## Fonctionnalités existantes
+- Affichage de la liste des restaurants
+- Page de détail d’un restaurant avec ses plats
+- API REST : endpoints /restaurants et /plats
